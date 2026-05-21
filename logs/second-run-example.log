@@ -1,0 +1,5 @@
+PLAY RECAP *********************************************************************
+web                        : ok=8    changed=0    unreachable=0    failed=0
+db                         : ok=9    changed=0    unreachable=0    failed=0
+
+Cette sortie montre une deuxieme execution propre : aucune tache ne modifie inutilement les serveurs.

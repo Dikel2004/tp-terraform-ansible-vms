@@ -1,0 +1,43 @@
+---
+- name: Installer Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Demarrer et activer Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Creer le dossier TLS
+  ansible.builtin.file:
+    path: /etc/nginx/tls
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  when: enable_https
+
+- name: Creer un certificat local pour HTTPS
+  ansible.builtin.command:
+    cmd: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/tls/server.key -out /etc/nginx/tls/server.crt -subj "/CN={{ inventory_hostname }}"
+    creates: /etc/nginx/tls/server.crt
+  when: enable_https
+
+- name: Publier la page web avec l'IP de la base de donnees
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ web_page_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configurer le site Nginx
+  ansible.builtin.template:
+    src: nginx-default.conf.j2
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Recharger Nginx

@@ -1,0 +1,18 @@
+---
+- name: Configuration commune des serveurs
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Configuration de la base de donnees
+  hosts: db
+  become: true
+  roles:
+    - db
+
+- name: Configuration du serveur web
+  hosts: web
+  become: true
+  roles:
+    - web

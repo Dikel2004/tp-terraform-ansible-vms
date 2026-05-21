@@ -1,0 +1,9 @@
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+ansible/inventory.ini
+ansible/group_vars/environment.yml
+*.retry
+*.log
+!logs/second-run-example.log
