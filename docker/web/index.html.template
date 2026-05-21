@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TP Docker - Web et DB</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      color: #1f2937;
+    }
+
+    main {
+      max-width: 760px;
+      margin: 80px auto;
+      padding: 32px;
+      background: white;
+      border: 1px solid #d8deea;
+      border-radius: 8px;
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #3155a4;
+    }
+
+    code {
+      background: #eef2ff;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Serveur web Nginx</h1>
+    <p>Le conteneur web fonctionne avec Docker Desktop.</p>
+    <p>Adresse IP du conteneur MariaDB : <code>${DB_HOST}</code></p>
+    <p>Nom de la base : <code>${DB_NAME}</code></p>
+  </main>
+</body>
+</html>

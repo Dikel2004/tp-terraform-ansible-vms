@@ -12,6 +12,49 @@ Objectif :
 - un playbook Ansible relancable sans erreur
 - une structure simple pour lancer `staging` ou `production` sans dupliquer le code
 
+## Version Docker Desktop sur Windows
+
+Si tu travailles sur Windows avec Docker Desktop, utilise cette version pour lancer rapidement le TP en local.
+
+Elle simule la meme architecture avec des conteneurs :
+
+- 1 conteneur `tp-web` avec Nginx ;
+- 1 conteneur `tp-db` avec MariaDB ;
+- 1 reseau Docker commun ;
+- une page Nginx qui affiche l'adresse IP du conteneur DB.
+
+Lancer :
+
+```bash
+docker compose up -d
+```
+
+Verifier :
+
+```bash
+docker compose ps
+```
+
+Ouvrir la page :
+
+```text
+http://localhost:8080
+```
+
+Arreter :
+
+```bash
+docker compose down
+```
+
+Supprimer aussi les donnees MariaDB :
+
+```bash
+docker compose down -v
+```
+
+Important : la version Docker est faite pour travailler facilement avec Docker Desktop. La version Terraform/Ansible garde la logique demandee dans le sujet avec des VMs.
+
 ## Schema simple du flux
 
 ```text
@@ -63,6 +106,12 @@ Page Nginx accessible sur la VM web
 |-- docs/
 |   |-- checklist.md
 |   `-- soutenance.md
+|-- docker/
+|   |-- db/
+|   |   `-- backup.sh
+|   `-- web/
+|       `-- index.html.template
+|-- docker-compose.yml
 `-- logs/
     `-- second-run-example.log
 ```

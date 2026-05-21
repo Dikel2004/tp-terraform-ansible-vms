@@ -9,6 +9,31 @@ Le projet separe clairement deux roles :
 
 Terraform ne configure pas Nginx ou MariaDB. Il cree seulement les VMs, le reseau et les fichiers utiles pour Ansible.
 
+## Si je presente avec Docker Desktop
+
+Sur mon PC Windows, je peux montrer une version locale avec Docker Desktop.
+
+Dans ce cas, je garde la meme logique :
+
+- un service `web` avec Nginx ;
+- un service `db` avec MariaDB ;
+- un reseau Docker commun ;
+- une page web qui affiche l'adresse IP de la base.
+
+Je lance avec :
+
+```bash
+docker compose up -d
+```
+
+Puis j'ouvre :
+
+```text
+http://localhost:8080
+```
+
+Je precise au prof que Docker sert ici a faire une demonstration locale sur Windows. La logique du sujet Terraform/Ansible reste presente dans les dossiers `terraform/` et `ansible/`.
+
 ## Explication du flux
 
 1. Je lance Terraform avec un fichier de variables, par exemple `staging.tfvars`.

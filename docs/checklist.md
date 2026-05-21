@@ -35,3 +35,11 @@
 - README explicatif : `README.md`
 - Schema du flux : section `Schema simple du flux`
 - Support oral : `docs/soutenance.md`
+
+## Demo Docker Desktop
+
+- Compose avec 2 conteneurs : `docker-compose.yml`
+- Nginx sur le conteneur web : service `web`
+- MariaDB sur le conteneur db : service `db`
+- Reseau commun : `tp_network`
+- Page affichant l'IP de la DB : `docker/web/index.html.template`
