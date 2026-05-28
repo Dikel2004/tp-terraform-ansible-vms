@@ -19,7 +19,7 @@ Objectif :
 | `db` | Base MariaDB | port interne 3306 |
 | `cadvisor` | Metriques Docker | http://localhost:8081 |
 | `prometheus` | Collecte les metriques | http://localhost:9090 |
-| `grafana` | Dashboard de visualisation | http://localhost:3000 |
+| `grafana` | Dashboard de visualisation | http://localhost:3001 |
 
 Identifiants Grafana :
 
@@ -97,7 +97,7 @@ Dans Prometheus, aller dans `Status > Targets` et verifier que `cadvisor` est `U
 4. Ouvrir Grafana :
 
 ```text
-http://localhost:3000
+http://localhost:3001
 ```
 
 Connexion :

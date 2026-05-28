@@ -44,7 +44,7 @@ Je peux ensuite ouvrir :
 http://localhost:8080  -> Nginx
 http://localhost:8081  -> cAdvisor
 http://localhost:9090  -> Prometheus
-http://localhost:3000  -> Grafana
+http://localhost:3001  -> Grafana
 ```
 
 Pour Grafana :
