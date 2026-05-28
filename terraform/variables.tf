@@ -1,6 +1,7 @@
 variable "environment" {
-  description = "Nom de l'environnement : staging ou production."
+  description = "Nom simple du projet."
   type        = string
+  default     = "niveau1"
 }
 
 variable "libvirt_uri" {
@@ -29,18 +30,7 @@ variable "base_image_path" {
 variable "network_cidr" {
   description = "CIDR du reseau commun."
   type        = string
-}
-
-variable "allowed_ports" {
-  description = "Ports autorises dans l'environnement."
-  type        = list(number)
-  default     = [22, 80]
-}
-
-variable "enable_https" {
-  description = "Indique si le HTTPS doit etre prepare."
-  type        = bool
-  default     = false
+  default     = "192.168.60.0/24"
 }
 
 variable "vms" {
@@ -50,4 +40,18 @@ variable "vms" {
     memory   = number
     vcpu     = number
   }))
+
+  default = {
+    web = {
+      hostname = "web"
+      memory   = 1024
+      vcpu     = 1
+    }
+
+    db = {
+      hostname = "db"
+      memory   = 1024
+      vcpu     = 1
+    }
+  }
 }

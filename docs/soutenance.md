@@ -1,29 +1,50 @@
-# Support oral rapide
+# Explication orale niveau 1
 
-## Idee generale
+## Phrase de depart
 
-Le projet separe clairement deux roles :
+J'ai realise le niveau 1 du TP.
 
-- Terraform construit l'infrastructure.
-- Ansible configure les serveurs.
+Le but est de creer une petite infrastructure avec deux machines :
 
-Terraform ne configure pas Nginx ou MariaDB. Il cree seulement les VMs, le reseau et les fichiers utiles pour Ansible.
+- une machine web avec Nginx ;
+- une machine base de donnees avec MariaDB.
 
-## Si je presente avec Docker Desktop
+Les deux machines sont dans le meme reseau.
 
-Sur mon PC Windows, je peux montrer une version locale avec Docker Desktop.
+## Explication simple
 
-Dans ce cas, je garde la meme logique :
+Terraform sert a creer les machines et le reseau.
 
-- un service `web` avec Nginx ;
-- un service `db` avec MariaDB ;
-- un reseau Docker commun ;
-- une page web qui affiche l'adresse IP de la base.
+Ensuite Ansible sert a configurer les machines :
+
+- il cree l'utilisateur `deploy` ;
+- il installe Nginx sur la machine web ;
+- il installe MariaDB sur la machine db ;
+- il demarre les services.
+
+Je ne modifie pas les machines a la main. Tout est ecrit dans les fichiers du projet.
+
+## Demo avec Docker Desktop
+
+Comme je travaille sur Windows, je montre la demo avec Docker Desktop.
+
+Docker lance deux conteneurs :
+
+- `tp-web` pour Nginx ;
+- `tp-db` pour MariaDB.
+
+Les deux conteneurs sont dans le meme reseau Docker.
 
 Je lance avec :
 
-```bash
+```powershell
 docker compose up -d
+```
+
+Je verifie avec :
+
+```powershell
+docker compose ps
 ```
 
 Puis j'ouvre :
@@ -32,56 +53,17 @@ Puis j'ouvre :
 http://localhost:8080
 ```
 
-Je precise au prof que Docker sert ici a faire une demonstration locale sur Windows. La logique du sujet Terraform/Ansible reste presente dans les dossiers `terraform/` et `ansible/`.
+La page affiche l'adresse IP de MariaDB. Cela prouve que le service web connait le service base de donnees.
 
-## Explication du flux
+## Ce que je peux dire si le prof demande pourquoi Docker
 
-1. Je lance Terraform avec un fichier de variables, par exemple `staging.tfvars`.
-2. Terraform cree une VM web, une VM db et un reseau commun.
-3. Terraform recupere les IPs et genere `ansible/inventory.ini`.
-4. Je lance Ansible.
-5. Ansible installe Nginx sur la VM web et MariaDB sur la VM db.
-6. La page Nginx affiche l'adresse IP de la VM db grace aux variables Ansible.
+La consigne parle de VMs avec Terraform et Ansible. Cette partie est presente dans les dossiers `terraform` et `ansible`.
 
-## Pourquoi les roles Ansible
+Sur mon PC Windows, j'utilise Docker Desktop pour faire une demonstration locale plus simple a lancer.
 
-J'ai separe les responsabilites :
+La logique reste la meme :
 
-- `common` : configuration commune, utilisateur `deploy`, paquets utiles, pare-feu.
-- `web` : uniquement Nginx et la page HTML.
-- `db` : uniquement MariaDB et la sauvegarde.
-
-Cette separation rend le code plus lisible et plus facile a expliquer.
-
-## Idempotence
-
-Le playbook est relancable parce que les modules Ansible declarent un etat attendu :
-
-- paquet present ;
-- service demarre ;
-- fichier avec un contenu precis ;
-- cron present.
-
-Donc une deuxieme execution ne refait pas tout inutilement.
-
-## Production et staging
-
-Je ne duplique pas le code.
-
-Le meme Terraform est utilise pour les deux environnements. Seuls les fichiers de variables changent :
-
-- `staging.tfvars`
-- `production.tfvars`
-
-En production, les VMs ont plus de ressources, HTTPS est active et le port 443 est autorise.
-
-## Securite
-
-Le pare-feu est configure avec UFW.
-
-Les ports ouverts viennent de Terraform :
-
-- staging : SSH et HTTP ;
-- production : SSH, HTTP et HTTPS.
-
-Pour le TP, le certificat HTTPS est auto-signe. En vrai projet, il faudrait un certificat officiel avec un nom de domaine.
+- un serveur web ;
+- un serveur base de donnees ;
+- un reseau commun ;
+- une page web accessible.

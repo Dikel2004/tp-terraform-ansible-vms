@@ -12,8 +12,3 @@ output "ansible_inventory" {
   description = "Fichier inventory genere pour Ansible."
   value       = local_file.ansible_inventory.filename
 }
-
-output "ansible_environment_vars" {
-  description = "Variables d'environnement generees pour Ansible."
-  value       = local_file.ansible_environment_vars.filename
-}

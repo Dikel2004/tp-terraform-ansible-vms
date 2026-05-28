@@ -8,9 +8,7 @@
   ansible.builtin.apt:
     name:
       - curl
-      - openssl
       - vim
-      - ufw
     state: present
 
 - name: Creer l'utilisateur deploy
@@ -29,15 +27,3 @@
     group: root
     mode: "0440"
     validate: "visudo -cf %s"
-
-- name: Autoriser les ports necessaires
-  community.general.ufw:
-    rule: allow
-    port: "{{ item }}"
-    proto: tcp
-  loop: "{{ allowed_ports }}"
-
-- name: Activer le pare-feu
-  community.general.ufw:
-    state: enabled
-    policy: deny

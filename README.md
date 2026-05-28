@@ -1,41 +1,41 @@
-# TP Terraform + Ansible - 2 VMs Linux
+# TP Niveau 1 - Terraform, Ansible et Docker
 
-Ce projet cree une petite infrastructure avec Terraform, puis configure les machines avec Ansible.
+Ce projet correspond au niveau 1 du sujet.
 
-Objectif :
+L'objectif est simple :
 
-- 1 VM `web` avec Nginx
-- 1 VM `db` avec MariaDB
-- les 2 VMs dans le meme reseau
-- un utilisateur Linux `deploy`
-- une page Nginx qui affiche l'adresse IP de la base de donnees
-- un playbook Ansible relancable sans erreur
-- une structure simple pour lancer `staging` ou `production` sans dupliquer le code
+- creer 2 machines Linux : une machine `web` et une machine `db` ;
+- mettre les deux machines dans le meme reseau ;
+- installer Nginx sur `web` ;
+- installer MariaDB sur `db` ;
+- creer un utilisateur `deploy` ;
+- avoir une page Nginx accessible ;
+- pouvoir relancer le playbook Ansible sans erreur.
 
-## Version Docker Desktop sur Windows
+Comme je travaille sur Windows avec Docker Desktop, j'ai aussi ajoute une demo Docker simple pour montrer le fonctionnement en local.
 
-Si tu travailles sur Windows avec Docker Desktop, utilise cette version pour lancer rapidement le TP en local.
+## Demo Docker Desktop
 
-Elle simule la meme architecture avec des conteneurs :
+La demo Docker lance :
 
-- 1 conteneur `tp-web` avec Nginx ;
-- 1 conteneur `tp-db` avec MariaDB ;
-- 1 reseau Docker commun ;
-- une page Nginx qui affiche l'adresse IP du conteneur DB.
+- un conteneur `tp-web` avec Nginx ;
+- un conteneur `tp-db` avec MariaDB ;
+- un reseau Docker commun ;
+- une page web qui affiche l'adresse IP du conteneur MariaDB.
 
 Lancer :
 
-```bash
+```powershell
 docker compose up -d
 ```
 
 Verifier :
 
-```bash
+```powershell
 docker compose ps
 ```
 
-Ouvrir la page :
+Ouvrir dans le navigateur :
 
 ```text
 http://localhost:8080
@@ -43,169 +43,132 @@ http://localhost:8080
 
 Arreter :
 
-```bash
+```powershell
 docker compose down
 ```
 
 Supprimer aussi les donnees MariaDB :
 
-```bash
+```powershell
 docker compose down -v
 ```
 
-Important : la version Docker est faite pour travailler facilement avec Docker Desktop. La version Terraform/Ansible garde la logique demandee dans le sujet avec des VMs.
-
-## Schema simple du flux
+## Schema simple
 
 ```text
 Utilisateur
    |
    v
-Terraform
+Nginx web
    |
-   |-- cree le reseau commun
-   |-- cree la VM web
-   |-- cree la VM db
-   |-- genere inventory.ini pour Ansible
    v
-Ansible
-   |
-   |-- cree l'utilisateur deploy
-   |-- installe Nginx sur web
-   |-- installe MariaDB sur db
-   |-- cree la page web avec l'IP de la DB
-   v
-Page Nginx accessible sur la VM web
+MariaDB db
 ```
 
-## Structure
+Avec Terraform et Ansible, le flux est :
+
+```text
+Terraform cree les VMs et le reseau
+             |
+             v
+Terraform genere l'inventaire Ansible
+             |
+             v
+Ansible configure web et db
+```
+
+## Structure du projet
 
 ```text
 .
 |-- ansible/
 |   |-- group_vars/
-|   |   |-- all.yml
-|   |   `-- environment.yml  # genere par Terraform
-|   |-- requirements.yml
+|   |   `-- all.yml
 |   |-- roles/
 |   |   |-- common/
 |   |   |-- web/
 |   |   `-- db/
 |   |-- inventory.ini.example
 |   `-- playbook.yml
+|-- docker/
+|   `-- web/
+|       `-- index.html.template
+|-- docs/
+|   |-- checklist.md
+|   `-- soutenance.md
+|-- logs/
+|   `-- second-run-example.log
 |-- terraform/
-|   |-- envs/
-|   |   |-- production.tfvars
-|   |   `-- staging.tfvars
 |   |-- templates/
 |   |   `-- inventory.ini.tftpl
 |   |-- main.tf
 |   |-- outputs.tf
 |   |-- providers.tf
+|   |-- terraform.tfvars.example
 |   `-- variables.tf
-|-- docs/
-|   |-- checklist.md
-|   `-- soutenance.md
-|-- docker/
-|   |-- db/
-|   |   `-- backup.sh
-|   `-- web/
-|       `-- index.html.template
 |-- docker-compose.yml
-`-- logs/
-    `-- second-run-example.log
+`-- README.md
 ```
 
 ## Ce que fait Terraform
 
-Terraform declare l'infrastructure :
+Terraform sert a creer l'infrastructure :
 
+- une VM `web` ;
+- une VM `db` ;
 - un reseau commun ;
-- deux VMs Linux ;
-- une IP pour chaque VM ;
-- un fichier `ansible/inventory.ini` genere automatiquement.
+- un fichier `ansible/inventory.ini` avec les adresses IP.
 
-Le provider utilise ici est `libvirt`, car il permet de creer des VMs locales proprement sans scripts bash caches.
+Commandes prevues sur un environnement Linux avec libvirt :
 
-Terraform genere aussi deux fichiers pour Ansible :
+```bash
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+terraform init
+terraform apply
+```
 
-- `ansible/inventory.ini` avec les IPs des VMs ;
-- `ansible/group_vars/environment.yml` avec les variables `allowed_ports` et `enable_https`.
+Pour detruire :
+
+```bash
+terraform destroy
+```
 
 ## Ce que fait Ansible
 
-Ansible configure les VMs :
+Ansible configure les machines :
 
 - role `common` : cree l'utilisateur `deploy` et installe les outils de base ;
-- role `web` : installe et demarre Nginx, puis publie une page HTML ;
-- role `db` : installe et demarre MariaDB, puis ajoute un cron de sauvegarde.
-- pare-feu : seuls les ports declares dans Terraform sont ouverts.
+- role `web` : installe Nginx et publie la page web ;
+- role `db` : installe MariaDB et active le service.
 
-Les taches sont idempotentes : relancer le playbook ne casse rien et ne duplique pas la configuration.
-
-## Lancer en staging
+Commande :
 
 ```bash
-cd terraform
-terraform init
-terraform apply -var-file="envs/staging.tfvars"
-
-cd ../ansible
-ansible-galaxy collection install -r requirements.yml
+cd ansible
 ansible-playbook -i inventory.ini playbook.yml
-```
-
-## Lancer en production
-
-```bash
-cd terraform
-terraform init
-terraform apply -var-file="envs/production.tfvars"
-
-cd ../ansible
-ansible-galaxy collection install -r requirements.yml
-ansible-playbook -i inventory.ini playbook.yml
-```
-
-## Detruire l'infrastructure
-
-```bash
-cd terraform
-terraform destroy -var-file="envs/staging.tfvars"
-```
-
-ou :
-
-```bash
-cd terraform
-terraform destroy -var-file="envs/production.tfvars"
 ```
 
 ## Verification attendue
 
-Apres Ansible :
+Avec Docker Desktop :
 
-```bash
-curl http://IP_DE_LA_VM_WEB
+```powershell
+docker compose ps
 ```
 
-La page doit afficher un message avec l'adresse IP de la VM DB.
+Les conteneurs `tp-web` et `tp-db` doivent etre `Up`.
 
-## Securite
-
-En production, les ports ouverts sont limites a SSH, HTTP et HTTPS. La variable `allowed_ports` se trouve dans :
-
-- `terraform/envs/staging.tfvars`
-- `terraform/envs/production.tfvars`
-
-Le HTTPS est active en production avec un certificat local auto-signe pour le TP. Pour un vrai deploiement, il faudra remplacer ce certificat par un certificat officiel lie a un nom de domaine.
-
-## Idempotence
-
-Un exemple de deuxieme execution propre est donne dans :
+Dans le navigateur :
 
 ```text
-logs/second-run-example.log
+http://localhost:8080
 ```
 
-Cela montre qu'Ansible peut etre relance sans erreur.
+La page doit afficher l'adresse IP de MariaDB.
+
+## Interdictions respectees
+
+- Pas de modification manuelle des machines.
+- Pas de script bash pour configurer les serveurs.
+- La configuration est declaree dans Terraform, Ansible ou Docker Compose.

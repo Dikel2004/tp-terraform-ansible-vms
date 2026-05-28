@@ -80,12 +80,3 @@ resource "local_file" "ansible_inventory" {
     db_ip   = libvirt_domain.vm["db"].network_interface[0].addresses[0]
   })
 }
-
-resource "local_file" "ansible_environment_vars" {
-  filename = "${path.module}/../ansible/group_vars/environment.yml"
-  content = yamlencode({
-    environment   = var.environment
-    allowed_ports = var.allowed_ports
-    enable_https  = var.enable_https
-  })
-}
