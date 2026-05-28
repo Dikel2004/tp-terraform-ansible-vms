@@ -1,69 +1,74 @@
 # Explication orale niveau 1
 
-## Phrase de depart
+## Introduction
 
-J'ai realise le niveau 1 du TP.
+J'ai realise le niveau 1 du sujet avec Docker Compose.
 
-Le but est de creer une petite infrastructure avec deux machines :
+Le projet lance une stack minimale avec :
 
-- une machine web avec Nginx ;
-- une machine base de donnees avec MariaDB.
+- Nginx ;
+- MariaDB ;
+- cAdvisor ;
+- Prometheus ;
+- Grafana.
 
-Les deux machines sont dans le meme reseau.
+## Ce que fait chaque service
 
-## Explication simple
+`web` lance Nginx. Il sert une page web simple accessible sur `localhost:8080`.
 
-Terraform sert a creer les machines et le reseau.
+`db` lance MariaDB. C'est la base de donnees de la stack.
 
-Ensuite Ansible sert a configurer les machines :
+`cadvisor` collecte les metriques Docker : CPU, memoire, reseau et etat des conteneurs.
 
-- il cree l'utilisateur `deploy` ;
-- il installe Nginx sur la machine web ;
-- il installe MariaDB sur la machine db ;
-- il demarre les services.
+`prometheus` recupere les metriques exposees par cAdvisor.
 
-Je ne modifie pas les machines a la main. Tout est ecrit dans les fichiers du projet.
+`grafana` affiche ces metriques dans un dashboard.
 
-## Demo avec Docker Desktop
+## Commandes de demo
 
-Comme je travaille sur Windows, je montre la demo avec Docker Desktop.
-
-Docker lance deux conteneurs :
-
-- `tp-web` pour Nginx ;
-- `tp-db` pour MariaDB.
-
-Les deux conteneurs sont dans le meme reseau Docker.
-
-Je lance avec :
+Je lance la stack :
 
 ```powershell
 docker compose up -d
 ```
 
-Je verifie avec :
+Je verifie que les conteneurs sont actifs :
 
 ```powershell
 docker compose ps
 ```
 
-Puis j'ouvre :
+Je peux ensuite ouvrir :
 
 ```text
-http://localhost:8080
+http://localhost:8080  -> Nginx
+http://localhost:8081  -> cAdvisor
+http://localhost:9090  -> Prometheus
+http://localhost:3000  -> Grafana
 ```
 
-La page affiche l'adresse IP de MariaDB. Cela prouve que le service web connait le service base de donnees.
+Pour Grafana :
 
-## Ce que je peux dire si le prof demande pourquoi Docker
+```text
+admin / admin
+```
 
-La consigne parle de VMs avec Terraform et Ansible. Cette partie est presente dans les dossiers `terraform` et `ansible`.
+Puis :
 
-Sur mon PC Windows, j'utilise Docker Desktop pour faire une demonstration locale plus simple a lancer.
+```text
+Dashboards > TP Niveau 1 > Docker - Vue globale
+```
 
-La logique reste la meme :
+## Ce que je dois montrer au prof
 
-- un serveur web ;
-- un serveur base de donnees ;
-- un reseau commun ;
-- une page web accessible.
+1. `README.md` pour montrer l'objectif et le schema.
+2. `docker-compose.yml` pour montrer les services.
+3. `monitoring/prometheus/prometheus.yml` pour montrer que Prometheus scrape cAdvisor.
+4. `monitoring/grafana/provisioning/datasources/prometheus.yml` pour montrer la datasource.
+5. `monitoring/grafana/dashboards/docker-overview.json` pour montrer le dashboard importe.
+6. Le terminal avec `docker compose ps`.
+7. Le navigateur avec Grafana et le dashboard.
+
+## Phrase de conclusion
+
+Pour conclure, Docker Compose lance les services. cAdvisor expose les metriques des conteneurs. Prometheus collecte ces metriques. Grafana les affiche dans un dashboard. Cela permet de visualiser l'etat de sante de la stack.

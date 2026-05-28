@@ -1,30 +1,24 @@
 # Checklist niveau 1
 
-## Terraform
+## Stack minimale
 
-- 2 VMs Linux prevues : `web` et `db`
-- Reseau commun : `libvirt_network.private`
-- `terraform apply` possible
-- `terraform destroy` possible
-- Inventory Ansible genere : `ansible/inventory.ini`
+- Docker Compose : `docker-compose.yml`
+- Conteneur Nginx : service `web`
+- Conteneur MariaDB : service `db`
 
-## Ansible
+## Monitoring et observabilite
 
-- Utilisateur `deploy` : role `common`
-- Nginx sur web : role `web`
-- MariaDB sur db : role `db`
-- Services actives : taches `service`
-- Playbook relancable : modules Ansible idempotents
+- cAdvisor : service `cadvisor`
+- Prometheus : service `prometheus`
+- Configuration Prometheus : `monitoring/prometheus/prometheus.yml`
+- Grafana : service `grafana`
+- Datasource Grafana : `monitoring/grafana/provisioning/datasources/prometheus.yml`
+- Dashboard Grafana : `monitoring/grafana/dashboards/docker-overview.json`
 
-## Demo Docker Desktop
+## Rendu
 
-- Conteneur web : `tp-web`
-- Conteneur db : `tp-db`
-- Reseau commun : `tp_network`
-- Page accessible : `http://localhost:8080`
-- Page avec IP MariaDB : `docker/web/index.html.template`
-
-## Interdictions
-
-- Pas de modification manuelle des VMs
-- Pas de script bash pour configurer les serveurs
+- Repo GitHub sur une branche `main`
+- README expliquant chaque service
+- Schema global des services
+- Screenshot dashboard Grafana a faire pendant la demo
+- Soutenance orale : `docs/soutenance.md`

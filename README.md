@@ -1,44 +1,63 @@
-# TP Niveau 1 - Terraform, Ansible et Docker
+# TP Niveau 1 - Docker Compose, Monitoring et Grafana
 
 Ce projet correspond au niveau 1 du sujet.
 
-L'objectif est simple :
+Objectif :
 
-- creer 2 machines Linux : une machine `web` et une machine `db` ;
-- mettre les deux machines dans le meme reseau ;
-- installer Nginx sur `web` ;
-- installer MariaDB sur `db` ;
-- creer un utilisateur `deploy` ;
-- avoir une page Nginx accessible ;
-- pouvoir relancer le playbook Ansible sans erreur.
+- lancer 2 conteneurs avec Docker Compose :
+  - Nginx ;
+  - MariaDB ;
+- collecter des metriques systeme avec Prometheus et cAdvisor ;
+- visualiser l'etat de sante dans Grafana ;
+- fournir un README clair et un schema simple des services.
 
-Comme je travaille sur Windows avec Docker Desktop, j'ai aussi ajoute une demo Docker simple pour montrer le fonctionnement en local.
+## Services
 
-## Demo Docker Desktop
+| Service | Role | URL |
+| --- | --- | --- |
+| `web` | Serveur Nginx | http://localhost:8080 |
+| `db` | Base MariaDB | port interne 3306 |
+| `cadvisor` | Metriques Docker | http://localhost:8081 |
+| `prometheus` | Collecte les metriques | http://localhost:9090 |
+| `grafana` | Dashboard de visualisation | http://localhost:3000 |
 
-La demo Docker lance :
+Identifiants Grafana :
 
-- un conteneur `tp-web` avec Nginx ;
-- un conteneur `tp-db` avec MariaDB ;
-- un reseau Docker commun ;
-- une page web qui affiche l'adresse IP du conteneur MariaDB.
+```text
+admin / admin
+```
 
-Lancer :
+## Schema global
+
+```text
+Navigateur
+   |
+   v
+Nginx web --------------+
+                        |
+MariaDB db              |
+                        |
+cAdvisor collecte les metriques Docker
+   |
+   v
+Prometheus stocke les metriques
+   |
+   v
+Grafana affiche le dashboard
+```
+
+## Lancer le projet
+
+Depuis le dossier du projet :
 
 ```powershell
 docker compose up -d
 ```
 
-Verifier :
+Verifier les conteneurs :
 
 ```powershell
 docker compose ps
-```
-
-Ouvrir dans le navigateur :
-
-```text
-http://localhost:8080
 ```
 
 Arreter :
@@ -47,128 +66,82 @@ Arreter :
 docker compose down
 ```
 
-Supprimer aussi les donnees MariaDB :
+Supprimer aussi les donnees :
 
 ```powershell
 docker compose down -v
 ```
 
-## Schema simple
+## Verification
 
-```text
-Utilisateur
-   |
-   v
-Nginx web
-   |
-   v
-MariaDB db
-```
-
-Avec Terraform et Ansible, le flux est :
-
-```text
-Terraform cree les VMs et le reseau
-             |
-             v
-Terraform genere l'inventaire Ansible
-             |
-             v
-Ansible configure web et db
-```
-
-## Structure du projet
-
-```text
-.
-|-- ansible/
-|   |-- group_vars/
-|   |   `-- all.yml
-|   |-- roles/
-|   |   |-- common/
-|   |   |-- web/
-|   |   `-- db/
-|   |-- inventory.ini.example
-|   `-- playbook.yml
-|-- docker/
-|   `-- web/
-|       `-- index.html.template
-|-- docs/
-|   |-- checklist.md
-|   `-- soutenance.md
-|-- logs/
-|   `-- second-run-example.log
-|-- terraform/
-|   |-- templates/
-|   |   `-- inventory.ini.tftpl
-|   |-- main.tf
-|   |-- outputs.tf
-|   |-- providers.tf
-|   |-- terraform.tfvars.example
-|   `-- variables.tf
-|-- docker-compose.yml
-`-- README.md
-```
-
-## Ce que fait Terraform
-
-Terraform sert a creer l'infrastructure :
-
-- une VM `web` ;
-- une VM `db` ;
-- un reseau commun ;
-- un fichier `ansible/inventory.ini` avec les adresses IP.
-
-Commandes prevues sur un environnement Linux avec libvirt :
-
-```bash
-cd terraform
-cp terraform.tfvars.example terraform.tfvars
-terraform init
-terraform apply
-```
-
-Pour detruire :
-
-```bash
-terraform destroy
-```
-
-## Ce que fait Ansible
-
-Ansible configure les machines :
-
-- role `common` : cree l'utilisateur `deploy` et installe les outils de base ;
-- role `web` : installe Nginx et publie la page web ;
-- role `db` : installe MariaDB et active le service.
-
-Commande :
-
-```bash
-cd ansible
-ansible-playbook -i inventory.ini playbook.yml
-```
-
-## Verification attendue
-
-Avec Docker Desktop :
-
-```powershell
-docker compose ps
-```
-
-Les conteneurs `tp-web` et `tp-db` doivent etre `Up`.
-
-Dans le navigateur :
+1. Ouvrir Nginx :
 
 ```text
 http://localhost:8080
 ```
 
-La page doit afficher l'adresse IP de MariaDB.
+2. Ouvrir cAdvisor :
 
-## Interdictions respectees
+```text
+http://localhost:8081
+```
 
-- Pas de modification manuelle des machines.
-- Pas de script bash pour configurer les serveurs.
-- La configuration est declaree dans Terraform, Ansible ou Docker Compose.
+3. Ouvrir Prometheus :
+
+```text
+http://localhost:9090
+```
+
+Dans Prometheus, aller dans `Status > Targets` et verifier que `cadvisor` est `UP`.
+
+4. Ouvrir Grafana :
+
+```text
+http://localhost:3000
+```
+
+Connexion :
+
+```text
+admin / admin
+```
+
+Dashboard :
+
+```text
+Dashboards > TP Niveau 1 > Docker - Vue globale
+```
+
+## Fichiers importants
+
+```text
+docker-compose.yml
+monitoring/prometheus/prometheus.yml
+monitoring/grafana/provisioning/datasources/prometheus.yml
+monitoring/grafana/provisioning/dashboards/default.yml
+monitoring/grafana/dashboards/docker-overview.json
+docker/web/index.html.template
+docs/soutenance.md
+```
+
+## Ce que fait chaque service
+
+`web` lance Nginx et affiche une page HTML simple.
+
+`db` lance MariaDB avec une base `tp_database`.
+
+`cadvisor` lit les informations Docker et expose les metriques des conteneurs.
+
+`prometheus` interroge cAdvisor regulierement et stocke les metriques.
+
+`grafana` utilise Prometheus comme source de donnees et affiche un dashboard.
+
+## Screenshot Grafana
+
+Pour le rendu, ouvrir Grafana, afficher le dashboard, puis faire une capture d'ecran.
+
+Le dashboard attendu est :
+
+```text
+Docker - Vue globale
+```
