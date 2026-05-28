@@ -21,8 +21,8 @@
       "id": 1,
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{name!=\"\"}[1m])) by (name)",
-          "legendFormat": "{{name}}",
+          "expr": "rate(container_cpu_usage_seconds_total{cpu=\"total\",id=~\"/docker/[a-f0-9].+\"}[2m])",
+          "legendFormat": "{{id}}",
           "refId": "A"
         }
       ],
@@ -49,8 +49,8 @@
       "id": 2,
       "targets": [
         {
-          "expr": "container_memory_usage_bytes{name!=\"\"}",
-          "legendFormat": "{{name}}",
+          "expr": "container_memory_usage_bytes{id=~\"/docker/[a-f0-9].+\"}",
+          "legendFormat": "{{id}}",
           "refId": "A"
         }
       ],
